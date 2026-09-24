@@ -28,21 +28,28 @@ function NodeBox({ b }: { b: Box }) {
 }
 
 const sources: Box[] = [
-  { x: 44, y: 66, w: 176, h: 64, title: "FILER NFS LAMA", sub: "fs01 · NFSv3 / NFSv4" },
-  { x: 44, y: 168, w: 176, h: 64, title: "SHARE SMB", sub: "dc02 · SMB 2.1 / 3.x" },
+  { x: 44, y: 66, w: 176, h: 64, title: "FILER NFS LAMA", sub: "fs01 • NFSv3 / NFSv4" },
+  { x: 44, y: 168, w: 176, h: 64, title: "SHARE SMB", sub: "dc02 • SMB 2.1 / 3.x" },
   { x: 44, y: 270, w: 176, h: 64, title: "DISK LOKAL / SAN", sub: "mount /mnt/legacy" },
   { x: 44, y: 372, w: 176, h: 64, title: "NAS END-OF-LIFE", sub: "vendor: tidak ditemukan" },
 ];
 
 const targets: Box[] = [
-  { x: 740, y: 116, w: 176, h: 64, title: "STORAGE BARU", sub: "nas02 · SMB 3.1.1" },
-  { x: 740, y: 238, w: 176, h: 64, title: "BACKUP / ARSIP", sub: "vault01 · NFSv4" },
-  { x: 740, y: 360, w: 176, h: 64, title: "TARGET LOKAL", sub: "/srv/target · XFS" },
+  { x: 740, y: 116, w: 176, h: 64, title: "STORAGE BARU", sub: "nas02 • SMB 3.1.1" },
+  { x: 740, y: 238, w: 176, h: 64, title: "BACKUP / ARSIP", sub: "vault01 • NFSv4" },
+  { x: 740, y: 360, w: 176, h: 64, title: "TARGET LOKAL", sub: "/srv/target • XFS" },
 ];
 
-const engine: Box = { x: 384, y: 96, w: 208, h: 330, title: "OMNIBLOB", sub: "engine · host fs-ops01", hot: true };
+const engine: Box = { x: 384, y: 96, w: 208, h: 350, title: "OMNIBLOB", sub: "engine • host fs-ops01", hot: true };
 
-const engineBlocks = ["scanner", "job scheduler", "transfer workers ×8", "verifier · sha256", "audit log"];
+const engineBlocks = [
+  "api gateway / router",
+  "job scheduler",
+  "transfer workers \u00d78",
+  "garbage collector",
+  "verifier (sha256)",
+  "audit log"
+];
 
 const inPaths = [
   "M 220 98 C 305 98, 298 168, 384 168",
@@ -62,7 +69,7 @@ export function Architecture() {
     <section id="arsitektur" className="relative border-t border-line bg-bgsoft/60">
       <div className="mx-auto max-w-6xl px-5 py-20 sm:py-24">
         <Reveal>
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-amber">02 — Arsitektur</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-amber">02 • Arsitektur</p>
           <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
             <h2 className="max-w-2xl font-display text-3xl font-bold leading-tight tracking-tight sm:text-[40px] sm:leading-[1.1]">
               Berjalan di dalam perimeter Anda. Bukan di sisi lain kabel.
@@ -124,11 +131,11 @@ export function Architecture() {
               <NodeBox b={engine} />
               {engineBlocks.map((name, i) => (
                 <g key={name}>
-                  <rect x="400" y={150 + i * 52} width="176" height="38" rx="4" fill="#0c131b" stroke="#17232f" />
-                  <text x="414" y={174 + i * 52} fontFamily="var(--font-mono)" fontSize="10.5" fill="#9db1c1">
+                  <rect x="400" y={150 + i * 46} width="176" height="36" rx="4" fill="#0c131b" stroke="#17232f" />
+                  <text x="414" y={173 + i * 46} fontFamily="var(--font-mono)" fontSize="10.5" fill="#9db1c1">
                     {name}
                   </text>
-                  <circle cx="562" cy={169 + i * 52} r="2.4" fill={i === 3 ? "#4cc573" : "#f2a33c"} className="led" style={{ animationDelay: `${i * 0.4}s` }} />
+                  <circle cx="562" cy={168 + i * 46} r="2.4" fill={i === 4 ? "#4cc573" : "#f2a33c"} className="led" style={{ animationDelay: `${i * 0.4}s` }} />
                 </g>
               ))}
 

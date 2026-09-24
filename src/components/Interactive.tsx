@@ -181,10 +181,9 @@ export function Deploy() {
     return () => window.clearTimeout(t);
   }, [toast]);
 
-  const installCmd = `$ tar xzf omniblob-2.4.1-linux-amd64.tar.gz
-$ sudo install -m 0755 omniblob /usr/local/bin/
-$ omniblob init
-$ sudo systemctl enable --now omniblob`;
+  const installCmd = `$ wget https://.../omniblob-1.0.0-linux-amd64
+$ chmod +x omniblob-1.0.0-linux-amd64
+$ ./omniblob-1.0.0-linux-amd64 -config config.yaml`;
 
   const [copied, setCopied] = useState(false);
   const doCopy = async () => {
@@ -200,20 +199,19 @@ $ sudo systemctl enable --now omniblob`;
         <div className="grid gap-14 lg:grid-cols-2 lg:gap-16">
           <div>
             <Reveal>
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-amber">06 — Deploy</p>
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-amber">06 • Deploy</p>
               <h2 className="mt-4 font-display text-3xl font-bold leading-tight tracking-tight sm:text-[40px] sm:leading-[1.1]">
-                Pasang di rak Anda sendiri.
+                Pasang di server Anda sendiri.
               </h2>
               <p className="mt-5 max-w-lg text-[15.5px] leading-relaxed text-dim">
-                Satu binary statis, tanpa dependensi runtime, tanpa agen di server sumber. Dari
-                unpack sampai job pertama biasanya di bawah sepuluh menit.
+                Satu binary statis (Golang), tanpa dependensi runtime tambahan. Cukup jalankan binary-nya dan sambungkan ke PostgreSQL Anda.
               </p>
             </Reveal>
             <Reveal delay={120} className="mt-8">
               <div className="overflow-hidden rounded-[6px] border border-line bg-[#0c131b]">
                 <div className="flex items-center justify-between border-b border-linesoft px-4 py-2">
                   <span className="font-mono text-[10.5px] tracking-wider text-faint">
-                    instalasi · linux amd64
+                    instalasi • linux amd64
                   </span>
                   <button
                     onClick={doCopy}
@@ -233,8 +231,7 @@ $ sudo systemctl enable --now omniblob`;
                 </pre>
               </div>
               <p className="mt-3 font-mono text-[10.5px] leading-relaxed tracking-wide text-faint">
-                Semua artifact ditandatangani. Verifikasi SHA-256 sebelum menjalankan — checksum
-                dipublikasikan terpisah dari mirror download.
+                Binary tidak memerlukan hak akses root (sudo) kecuali Anda melakukan binding ke port di bawah 1024.
               </p>
             </Reveal>
           </div>
@@ -243,7 +240,7 @@ $ sudo systemctl enable --now omniblob`;
             <div className="overflow-hidden rounded-[6px] border border-line bg-panel">
               <div className="border-b border-line bg-panel2 px-5 py-3">
                 <h3 className="font-mono text-[11.5px] font-semibold uppercase tracking-[0.2em] text-amber">
-                  Rilis v2.4.1 · channel stable
+                  Rilis v1.0.0-beta • channel early-access
                 </h3>
               </div>
               {downloads.map((d) => (
@@ -253,28 +250,24 @@ $ sudo systemctl enable --now omniblob`;
                 >
                   <div>
                     <p className="text-[14.5px] font-medium text-ink">
-                      {d.platform} <span className="text-faint">·</span>{" "}
+                      {d.platform} <span className="text-faint">•</span>{" "}
                       <span className="font-mono text-[12.5px] text-dim">{d.arch}</span>
                     </p>
                     <p className="mt-0.5 font-mono text-[10.5px] uppercase tracking-[0.14em] text-faint">
-                      {d.kind} · {d.size} · sha256 tersedia
+                      {d.kind} • {d.size} • sha256 tersedia
                     </p>
                   </div>
                   <button
-                    onClick={() =>
-                      setToast(`Pratinjau demo — artifact ${d.platform} (${d.arch}) tersedia di rilis internal.`)
-                    }
-                    className="focus-ring flex shrink-0 items-center gap-2 rounded-[3px] border border-line px-3.5 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-dim transition-all duration-200 hover:border-amber hover:text-amber group-hover:border-amber/50"
+                    onClick={() => setToast("Download mirror sedang disiapkan untuk rilis Beta.")}
+                    className="focus-ring flex items-center gap-2 rounded-[3px] border border-line px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-dim transition-colors hover:border-amber/60 hover:text-ink"
                   >
-                    unduh
-                    <IconArrow className="h-3.5 w-3.5 rotate-90" />
+                    Unduh <IconArrow className="h-3 w-3 rotate-90 opacity-60" />
                   </button>
                 </div>
               ))}
               <div className="border-t border-line px-5 py-3.5">
                 <p className="font-mono text-[10.5px] leading-relaxed tracking-wide text-faint">
-                  Dukungan LTS untuk 2.4.x sampai 2028-06. Migrasi dari 2.3.x: cukup ganti binary,
-                  format job file tidak berubah.
+                  Ini adalah versi early-access (Beta). Fitur mungkin masih berubah secara agresif sebelum mencapai stabil v1.0.0.
                 </p>
               </div>
             </div>

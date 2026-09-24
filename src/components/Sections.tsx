@@ -18,9 +18,8 @@ function TickerRow() {
 
 export function Ticker() {
   return (
-    <div className="marquee overflow-hidden border-y border-line bg-panel/60 py-3" aria-hidden="true">
-      <div className="marquee-track">
-        <TickerRow />
+    <div className="overflow-hidden border-y border-line bg-panel/60 py-4" aria-hidden="true">
+      <div className="flex flex-wrap justify-center gap-y-3 px-4">
         <TickerRow />
       </div>
     </div>

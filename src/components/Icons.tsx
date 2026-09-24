@@ -11,10 +11,14 @@ const base = {
 export function Logo({ className = "h-7 w-7" }: P) {
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
-      <rect x="1.5" y="1.5" width="29" height="29" rx="6" fill="none" stroke="currentColor" strokeWidth="1.8" opacity="0.55" />
-      <rect x="8" y="9" width="16" height="3.4" rx="1" fill="#f2a33c" />
-      <rect x="8" y="14.6" width="11" height="3.4" rx="1" fill="#5bc8dc" />
-      <rect x="8" y="20.2" width="13.5" height="3.4" rx="1" fill="#4cc573" />
+      <g stroke="var(--color-bg)" strokeWidth="2" strokeLinejoin="round">
+        {/* Top Face - Cyan (Control & Security) */}
+        <path d="M16 2 L3 9.5 L16 17 L29 9.5 Z" fill="#5bc8dc" />
+        {/* Left Face - Amber (Migration & Activity) */}
+        <path d="M3 9.5 L3 24.5 L16 32 L16 17 Z" fill="#f2a33c" />
+        {/* Right Face - Green (Integrity & Success) */}
+        <path d="M29 9.5 L29 24.5 L16 32 L16 17 Z" fill="#4cc573" />
+      </g>
     </svg>
   );
 }
