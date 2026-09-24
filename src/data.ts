@@ -118,32 +118,32 @@ export const steps: Step[] = [
   {
     n: "01",
     title: "Inventarisasi",
-    body: "Scan seluruh mount sumber: jumlah file, ukuran, tipe, umur, dan struktur permission. Hasilnya inventori yang bisa dibaca manusia dan mesin — dasar semua keputusan berikutnya.",
-    out: "omniblob scan nfs://fs01/export/finance --out inventaris.csv",
+    body: "Scan seluruh mount sumber: jumlah file, ukuran, tipe, umur, dan struktur direktori. Hasilnya inventori yang dicatat ke database lokal.",
+    out: "omniblob -scan -config ./config.yaml",
   },
   {
     n: "02",
-    title: "Perencanaan",
-    body: "Kelompokkan file ke dalam job, hitung estimasi durasi dan kebutuhan bandwidth, deteksi bentrok permission dan path yang terlalu panjang sebelum menjadi masalah di tengah malam.",
-    out: "omniblob plan inventaris.csv --job finance-migration",
+    title: "Transfer (API/Upload)",
+    body: "Alih-alih pull, klien bisa langsung melakukan push file baru ke OmniBlob via REST API yang diamankan dengan API Key.",
+    out: "API: POST /api/v1/pelayanan/upload",
   },
   {
     n: "03",
-    title: "Transfer",
-    body: "Transfer delta multi-thread dengan resume otomatis saat koneksi putus, batas bandwidth agar produksi tidak tercekik, dan jendela jadwal — misalnya hanya 22:00–05:00.",
-    out: "omniblob run --job finance-migration --bw 400MiB/s",
+    title: "Deduplikasi & Hash (CAS)",
+    body: "Setiap file yang masuk dihitung SHA-256 nya. File identik tidak digandakan, menghemat penyimpanan target secara drastis.",
+    out: "Hash calculated: sha256 -> objects/a1b2...",
   },
   {
     n: "04",
-    title: "Verifikasi",
-    body: "Checksum per file dibandingkan sumber lawan target. File yang mismatch masuk antrean ulang otomatis, bukan ke dalam email laporan yang harus Anda baca manual.",
-    out: "omniblob verify --job finance-migration --algo sha256",
+    title: "Virtual File System",
+    body: "File fisik disimpan secara rata (flat) di object storage, namun klien tetap melihat struktur folder logis (Virtual File System).",
+    out: "API: GET /api/v1/explorer/list",
   },
   {
     n: "05",
-    title: "Cutover & audit",
-    body: "Sinkronisasi final singkat saat jendela perubahan, lalu laporan per job: apa yang pindah, apa yang diverifikasi, apa yang ditahan. Audit log siap untuk tim compliance.",
-    out: "omniblob report --job finance-migration --format pdf",
+    title: "Dashboard & Audit",
+    body: "Pantau ukuran storage, jumlah file yatim, dan performa transfer langsung dari Dashboard Admin berbasis React.",
+    out: "API: GET /api/v1/dashboard/summary",
   },
 ];
 
@@ -154,33 +154,33 @@ export const specGroups: SpecGroup[] = [
   {
     title: "Sumber & target",
     rows: [
-      { k: "Protokol sumber", v: "NFSv3, NFSv4/4.1, SMB 2.1/3.x, CIFS, mount lokal (ext4, XFS, ZFS, Btrfs), FTP read-only" },
-      { k: "Protokol target", v: "NFS, SMB, filesystem lokal — target campuran dalam satu job diperbolehkan" },
-      { k: "Skala teruji", v: "Miliaran file per lingkungan; snapshot inventori per run; file tunggal di atas 16 TiB" },
+      { k: "Protokol sumber", v: "NFS, SMB, mount lokal via scanner, atau API Upload langsung (REST)" },
+      { k: "Protokol target", v: "Target Lokal via Object Storage (CAS) di mount point /objects" },
+      { k: "Skala teruji", v: "Miliaran file per lingkungan; snapshot inventori per run ke PostgreSQL" },
     ],
   },
   {
     title: "Integritas & metadata",
     rows: [
-      { k: "Verifikasi", v: "SHA-256 atau BLAKE2b per file, pra dan pasca transfer; mode perbandingan byte-for-byte opsional" },
-      { k: "Permission", v: "POSIX mode, uid/gid, ACL NFSv4, NTFS ACL via SMB, xattr, hard link, sparse file, timestamp" },
-      { k: "Penanganan error", v: "Retry berpola backoff, antrean gagal terpisah, exit code eksplisit — tidak ada kegagalan diam-diam" },
+      { k: "Verifikasi", v: "SHA-256 Hashing untuk deduplikasi (CAS) dan integritas data" },
+      { k: "Permission", v: "Preservasi atribut dasar file (nama, modul, path logis, dan ukuran)" },
+      { k: "Penanganan error", v: "Sidecar meta.json per-file untuk disaster recovery dan sinkronisasi DB ulang" },
     ],
   },
   {
     title: "Operasi",
     rows: [
-      { k: "Antarmuka", v: "CLI, job file YAML, REST API; cocok untuk cron, pipeline internal, atau operasi manual" },
-      { k: "Kontrol akses", v: "RBAC per job, token berumur pendek, audit log terstruktur untuk setiap perintah" },
-      { k: "Observabilitas", v: "Endpoint metrik format Prometheus, log JSON terstruktur, status job real-time" },
+      { k: "Antarmuka", v: "REST API, Admin Dashboard (React), dan Daemon Config (YAML)" },
+      { k: "Kontrol akses", v: "Autentikasi terpusat via API Key (X-API-KEY, X-API-USER, X-API-PASS)" },
+      { k: "Observabilitas", v: "Dashboard statistik real-time (Storage Explorer), log interaktif via stdout" },
     ],
   },
   {
     title: "Deployment",
     rows: [
-      { k: "Bentuk", v: "Satu binary statis Linux (amd64, arm64); paket .deb dan .rpm; image Docker; unit systemd disertakan" },
-      { k: "Dependensi", v: "Tidak ada runtime tambahan; tidak ada agen di server sumber maupun target" },
-      { k: "Lingkungan", v: "Bare metal, VM, cluster Kubernetes internal, dan lingkungan air-gapped penuh" },
+      { k: "Bentuk", v: "Satu binary statis (Go); tidak memerlukan setup web server (Apache/Nginx)" },
+      { k: "Dependensi", v: "PostgreSQL untuk manajemen metadata; Storage disk (Local/Mount)" },
+      { k: "Lingkungan", v: "Bare metal, VM, dan lingkungan air-gapped penuh (On-Premise)" },
     ],
   },
 ];
@@ -190,56 +190,55 @@ export type CliTab = { id: string; label: string; file: string; code: string };
 export const cliTabs: CliTab[] = [
   {
     id: "yaml",
-    label: "Job file",
-    file: "finance-migration.yaml",
-    code: `job: finance-migration
-source:
-  type: nfs
-  host: fs01.internal
-  path: /export/finance
-target:
-  type: smb
-  host: nas02.internal
-  share: finance
-options:
-  verify: sha256
-  preserve: [mode, uid, gid, acl, xattr, times]
-  bandwidth: 400MiB/s
-  schedule: "0 22 * * *"
-on_error: retry-3-then-hold`,
+    label: "Config",
+    file: "config.yaml",
+    code: `server:
+  port: 4000
+  base_url: "http://localhost:4000"
+
+database:
+  host: "localhost"
+  port: 5432
+  user: "postgres"
+  password: "password123"
+  name: "omniblob"
+
+storage:
+  base_path: "D:/omniblobpath/objects"
+  legacy_path: "C:/legacy_share"`,
   },
   {
     id: "cli",
-    label: "CLI",
+    label: "Daemon",
     file: "shell",
-    code: `$ omniblob scan   nfs://fs01.internal/export/finance \\
-                  --out inventaris.csv
+    code: `$ omniblob.exe -config ./config.yaml
 
-$ omniblob plan   inventaris.csv --job finance-migration
+========================================================
+dYs? OmniBlob Storage Node & API Server is RUNNING
+dY"S Dashboard is accessible at: http://localhost:4000/
+========================================================
 
-$ omniblob run    --job finance-migration --dry-run
-  → 814,4 GiB akan ditransfer · 0 konflik terdeteksi
-
-$ omniblob run    --job finance-migration --verify
-
-$ omniblob status --watch`,
+{"level":"info","message":"Starting OmniBlob Object Storage"}`,
   },
   {
     id: "api",
     label: "REST API",
     file: "HTTP",
-    code: `POST /api/v1/jobs/finance-migration/run
-Authorization: Bearer ••••••••••••
-Content-Type: application/json
+    code: `POST /api/v1/pelayanan/upload
+X-API-KEY: be_pwni_secret_key_2026
+X-API-USER: be_pwni
+X-API-PASS: be_pwni_pass_123
+Content-Type: multipart/form-data
 
-{ "verify": "sha256", "dry_run": false }
+(file data)
 
-→ 202 Accepted
++' 201 Created
 {
-  "run_id": "run-0483",
-  "state": "queued",
-  "eta_seconds": 2520,
-  "metrics_url": "/api/v1/runs/run-0483/metrics"
+  "success": true,
+  "data": {
+    "checksum": "a1b2c3d4...",
+    "path": "be-pwni/pelayanan/doc.pdf"
+  }
 }`,
   },
 ];
@@ -249,37 +248,37 @@ export type Faq = { q: string; a: string };
 export const faqs: Faq[] = [
   {
     q: "Apakah data kami keluar dari jaringan?",
-    a: "Tidak, dan ini bukan fitur yang bisa dimatikan — ini arsitekturnya. OmniBlob berjalan di infrastruktur Anda dan memindahkan data langsung antara sistem yang Anda tentukan. Tidak ada komponen yang menghubungi layanan eksternal, dan telemetri mati secara default.",
+    a: "Tidak. OmniBlob berjalan murni di infrastruktur Anda (On-Premise) dan menyimpan fisik data secara lokal. Tidak ada komponen yang menghubungi layanan eksternal (cloud).",
   },
   {
-    q: "Apa bedanya dengan rsync?",
-    a: "rsync memindahkan isi satu path dengan baik. OmniBlob memakai pendekatan serupa untuk transfer delta, lalu menambahkan yang dibutuhkan migrasi skala produksi: inventarisasi, perencanaan job, pemetaan permission antar rezim ACL, verifikasi per file, penjadwalan, resume, dan audit log. Untuk satu folder, rsync sudah cukup. Untuk 400 share warisan, Anda butuh yang kedua.",
+    q: "Apa bedanya dengan storage biasa?",
+    a: "Storage biasa menyimpan file berulang kali. OmniBlob memakai pendekatan CAS (Content-Addressable Storage). File identik (walau beda nama) hanya disimpan satu kali secara fisik, menghemat kapasitas disk drastis, sambil tetap mempertahankan struktur logis Virtual File System.",
   },
   {
-    q: "Bagaimana permission dan ACL ditangani?",
-    a: "Setiap job punya daftar atribut yang dipertahankan: mode, uid/gid, ACL NFSv4, NTFS ACL via SMB, xattr, timestamp, hard link, dan sparse file. Jalankan dry-run dan OmniBlob melaporkan atribut yang tidak bisa dipetakan ke target sebelum satu byte pun dipindahkan.",
+    q: "Bagaimana integrasinya?",
+    a: "Aplikasi internal Anda tidak perlu pusing memikirkan NAS/SAN. Cukup push file via REST API OmniBlob. OmniBlob akan mengatur deduplikasi, hashing, dan memberikan Presigned URL untuk akses yang aman.",
   },
   {
     q: "Apakah perlu memasang agen di server sumber?",
-    a: "Tidak. OmniBlob berbicara lewat protokol yang memang sudah ada — NFS dan SMB — atau lewat mount lokal. Satu binary di satu host yang punya akses ke sumber dan target. Server lama tidak perlu disentuh sama sekali.",
+    a: "Tidak. OmniBlob adalah API Gateway mandiri. Aplikasi klien (BE/FE) cukup memanggil API HTTP standar untuk upload dan sinkronisasi file.",
   },
   {
     q: "Bisa jalan di lingkungan air-gapped?",
-    a: "Bisa. Binary-nya statis tanpa dependensi runtime, tidak butuh koneksi keluar saat instalasi maupun operasi, dan semua job dijalankan dari job file lokal. Beberapa instalasi kami berjalan di jaringan yang tidak pernah menyentuh internet.",
+    a: "Sangat bisa. Binary-nya statis (Golang), tidak butuh koneksi keluar saat instalasi maupun operasi. Database yang dibutuhkan hanyalah PostgreSQL internal.",
   },
   {
-    q: "Berapa lama migrasi skala besar biasanya berjalan?",
-    a: "Tergantung volume dan bandwidth yang Anda izinkan — karena itu ada fase perencanaan. Untuk ratusan GiB sampai beberapa TiB, sebagian besar waktu habis di transfer pertama. Setelahnya, sinkronisasi delta harian hanya memindahkan perubahan, dan cutover final biasanya selesai dalam satu jendela perubahan pendek.",
+    q: "Berapa lama migrasi awal (inventarisasi) berjalan?",
+    a: "OmniBlob memiliki fitur scanner bawaan yang akan mengindeks file lama dari /legacy_share langsung ke PostgreSQL. Kecepatan tergantung kapabilitas I/O disk Anda.",
   },
 ];
 
 export type Dl = { platform: string; arch: string; kind: string; size: string };
 
 export const downloads: Dl[] = [
-  { platform: "Linux", arch: "amd64", kind: ".tar.gz", size: "18,4 MB" },
-  { platform: "Linux", arch: "arm64", kind: ".tar.gz", size: "17,1 MB" },
-  { platform: "Debian / Ubuntu", arch: "amd64", kind: ".deb", size: "19,0 MB" },
-  { platform: "RHEL / Rocky", arch: "x86_64", kind: ".rpm", size: "19,2 MB" },
+  { platform: "Windows", arch: "amd64", kind: ".exe", size: "12,1 MB" },
+  { platform: "Windows", arch: "386 (32-bit)", kind: ".exe", size: "10,8 MB" },
+  { platform: "Linux", arch: "amd64", kind: "binary", size: "11,4 MB" },
+  { platform: "Linux", arch: "386 (32-bit)", kind: "binary", size: "10,1 MB" },
   { platform: "Docker image", arch: "multi", kind: "OCI", size: "42,7 MB" },
 ];
 

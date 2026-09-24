@@ -15,7 +15,7 @@ export function Nav() {
             Omni<span className="text-amber">Blob</span>
           </span>
           <span className="ml-1 hidden rounded-[3px] border border-line px-1.5 py-0.5 font-mono text-[10px] text-faint sm:inline">
-            v2.4.1
+            v1.0.0-beta
           </span>
         </a>
         <nav className="hidden items-center gap-6 md:flex">
@@ -168,7 +168,7 @@ export function Hero() {
                 <span className="text-line">/</span>
                 <span>migrasi &amp; sinkronisasi file</span>
                 <span className="text-line">/</span>
-                <span className="text-cy">LTS v2.4.1</span>
+                <span className="text-cy">Early Access v1.0.0-beta</span>
               </p>
             </Reveal>
 

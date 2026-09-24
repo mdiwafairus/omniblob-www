@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const port = parseInt(env.PORT || env.VITE_PORT || "3000", 10);
+  const port = parseInt(env.PORT || env.VITE_PORT || "5173", 10);
 
   return {
     plugins: [react(), tailwindcss()],
